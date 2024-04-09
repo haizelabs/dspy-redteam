@@ -125,6 +125,7 @@ def main():
     print(f"--- Raw Harmful Intent Strings ---")
     print(f"Baseline Score: {base_score}")
 
+    # Evaluating architecture with not compilation
     attacker_prog = AttackProgram(layers=5)
     print(f"\n--- Evaluating Initial Architecture ---")
     eval_program(attacker_prog, trainset)
@@ -140,6 +141,7 @@ def main():
         eval_kwargs=dict(num_threads=16, display_progress=True, display_table=0),
     )
 
+    # Evaluating architecture DSPy post-compilation
     print(f"\n--- Evaluating Optimized Architecture ---")
     eval_program(best_prog, trainset)
 
