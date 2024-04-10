@@ -10,6 +10,7 @@ To our knowledge, this is the first attempt at using any auto-prompting *framewo
 </figure>
 
 
+<br>
 This is also probably the deepest architecture in public optimized with DSPy to date.
 
 The following Table demonstrates the effectiveness of the chosen architecture, as well as the benefit of DSPy compilation:
@@ -25,6 +26,6 @@ The following Table demonstrates the effectiveness of the chosen architecture, a
 <em>Table 1: ASR with raw harmful inputs, un-optimized architecture, and architecture post DSPy compilation.</em>
 </div>
 
-With *no specific prompt engineering*, we are able to achieve an Attack Success Rate of 44%, 4x over the baseline. This is by no means the SOTA, but considering how we essentailly spent no effort designing the architecture and prompts, and considering how we just used an off-the-shelf optimizer with almost no hyperparameter tuning (except to fit computer constraints), we think it is pretty exciting that we can achieve this result!
+With *no specific prompt engineering*, we are able to achieve an Attack Success Rate of 44%, 4x over the baseline. This is by no means the SOTA, but considering how we essentially spent no effort designing the architecture and prompts, and considering how we just used an off-the-shelf optimizer with almost no hyperparameter tuning (except to fit compute constraints), we think it is pretty exciting that we can achieve this result!
 
 Full exposition on the [Haize Labs blog](https://blog.haizelabs.com/posts/dspy/).
