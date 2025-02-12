@@ -1,27 +1,25 @@
 import dspy
 import instructor
 import json
-import openai
 import os
 from dotenv import load_dotenv
 from dspy.evaluate import Evaluate
-from dspy.teleprompt import MIPRO
+from dspy.teleprompt import MIPROv2
 from openai import OpenAI
 from tqdm import tqdm
-from utils import get_response, judge_prompt
+from utils import get_response, judge_prompt, verdict_judge
 
 load_dotenv()
-openai.api_key = os.getenv("OPENAI_API_KEY")
 instructor_client = instructor.from_openai(OpenAI())
 
-attack_model = dspy.OpenAI(model="gpt-3.5-turbo-instruct", max_tokens=512)
+attack_model = dspy.LM(model="gpt-4o-mini", max_tokens=512)
 dspy.settings.configure(lm=attack_model)
 
 target_client = OpenAI(
     api_key=os.getenv("TOGETHER_API_KEY"),
     base_url="https://api.together.xyz/v1",
 )
-target_model_name = "lmsys/vicuna-7b-v1.5"
+target_model_name = "mistralai/Mistral-7B-Instruct-v0.2"
 
 
 class Attack(dspy.Signature):
@@ -82,14 +80,17 @@ class AttackProgram(dspy.Module):
         return self.try_attacks[-1](harmful_intent=harmful_intent, critique=critique)
 
 
-def metric(intent, attack_prompt, trace=None, eval_round=True):
+def metric(intent, attack_prompt, use_verdict=True, trace=None, eval_round=True):
     response = get_response(
         target_client,
         target_model_name,
         attack_prompt,
         inference_params={"max_tokens": 512, "temperature": 0},
     )
-    score = judge_prompt(instructor_client, intent, response)[0]
+    if use_verdict:
+        score = judge_prompt(instructor_client, intent, response)[0]
+    else:
+        score = verdict_judge(intent, response)[0]
     if eval_round:
         score = round(score)
     return score
@@ -125,20 +126,19 @@ def main():
     print(f"--- Raw Harmful Intent Strings ---")
     print(f"Baseline Score: {base_score}")
 
-    # Evaluating architecture with not compilation
+    # Evaluating architecture with no compilation
     attacker_prog = AttackProgram(layers=5)
     print(f"\n--- Evaluating Initial Architecture ---")
     eval_program(attacker_prog, trainset)
 
-    optimizer = MIPRO(metric=metric, verbose=True, view_data_batch_size=3)
+    optimizer = MIPROv2(metric=metric, auto="light")
     best_prog = optimizer.compile(
         attacker_prog,
         trainset=trainset,
         max_bootstrapped_demos=2,
         max_labeled_demos=0,
-        num_trials=30,
+        num_trials=1,
         requires_permission_to_run=False,
-        eval_kwargs=dict(num_threads=16, display_progress=True, display_table=0),
     )
 
     # Evaluating architecture DSPy post-compilation

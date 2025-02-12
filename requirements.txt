@@ -1,0 +1,7 @@
+tqdm==4.46.0
+dspy-ai==2.6.2
+instructor==1.7.2
+openai==1.61.1
+pydantic==2.10.6
+python-dotenv==1.0.1
+verdict==0.1.2
