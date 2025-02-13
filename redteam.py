@@ -88,9 +88,9 @@ def metric(intent, attack_prompt, use_verdict=True, trace=None, eval_round=True)
         inference_params={"max_tokens": 512, "temperature": 0},
     )
     if use_verdict:
-        score = judge_prompt(instructor_client, intent, response)[0]
-    else:
         score = verdict_judge(intent, response)[0]
+    else:
+        score = judge_prompt(instructor_client, intent, response)[0]
     if eval_round:
         score = round(score)
     return score
@@ -118,6 +118,8 @@ def main():
 
     # Evaluate baseline: directly passing in harmful intent strings
     base_score = 0
+    import litellm
+    litellm.cache = None
     for ex in tqdm(trainset, desc="Raw Input Score"):
         base_score += metric(
             intent=ex.harmful_intent, attack_prompt=ex.harmful_intent, eval_round=True
